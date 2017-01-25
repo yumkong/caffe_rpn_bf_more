@@ -54,8 +54,8 @@ namespace caffe {
     vector<int> number_left(num_imgs, roi_per_img_);
     for (int i = 0; i < num_rois_; i++){
       int index = sorted_idx[i];
-      int s = index % (width_*height_);
-      int n = index / (width_*height_);
+      int s = index % (width_*height_); //0
+      int n = index / (width_*height_); // index
       int batch_ind = bottom_rois[n*5*spatial_dim_+s];
       if (number_left[batch_ind]>0){
         number_left[batch_ind]--;

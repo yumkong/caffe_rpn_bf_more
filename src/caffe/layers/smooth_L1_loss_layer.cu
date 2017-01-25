@@ -38,9 +38,10 @@ namespace caffe {
   __global__ void kernel_channel_sum(const int num, const int channels,
     const int spatial_dim, const Dtype* data, Dtype* channel_sum) {
     CUDA_KERNEL_LOOP(index, num * spatial_dim) {
-      int n = index / spatial_dim;
-      int s = index % spatial_dim;
+      int n = index / spatial_dim;  // index
+      int s = index % spatial_dim;  //  0
       Dtype sum = 0;
+	  // channels = 8, currently
       for (int c = 0; c < channels; ++c) {
         sum += data[(n * channels + c) * spatial_dim + s];
       }
@@ -115,7 +116,7 @@ namespace caffe {
 
         Dtype pre_fixed_normalizer = this->layer_param_.loss_param().pre_fixed_normalizer();
         Dtype normalizer =  get_normalizer(normalization_, pre_fixed_normalizer);
-	LOG(INFO) << "SmoothL1 Backward: normalizer = " << normalizer;
+	    LOG(INFO) << "SmoothL1 Backward: normalizer = " << normalizer;
         Dtype alpha = sign * top[0]->cpu_diff()[0] / normalizer;
 
         caffe_gpu_axpby(
