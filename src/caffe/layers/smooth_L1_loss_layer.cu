@@ -73,10 +73,20 @@ namespace caffe {
     caffe_gpu_asum(count, errors_.gpu_data(), &loss);
     int spatial_dim = diff_.height() * diff_.width();
 
+    //0308 added: sum of all weights value as normalizer
+    Dtype valid_count = -1;
+    const int nthreads = outer_num_ * inner_num_;
+    if (normalization_ == LossParameter_NormalizationMode_VALID) {
+        caffe_gpu_asum(nthreads, bottom[2]->gpu_data(), &valid_count);
+    }
+    // 0308 added: if all weights are zeros, set as invalid
+    if (valid_count == 0)
+    { valid_count = -1; }
+
     Dtype pre_fixed_normalizer = this->layer_param_.loss_param().pre_fixed_normalizer();
     top[0]->mutable_cpu_data()[0] = loss / get_normalizer(normalization_,
-      pre_fixed_normalizer);
-    LOG(INFO) << "SmoothL1 Forward: normalization_ = " << normalization_ << ", pre_fixed_normalizer = " << pre_fixed_normalizer;
+      pre_fixed_normalizer, valid_count);
+    //LOG(INFO) << "SmoothL1 Forward: normalization_ = " << normalization_ << ", pre_fixed_normalizer = " << pre_fixed_normalizer;
     // Output per-instance loss
     if (top.size() >= 2) {
       kernel_channel_sum<Dtype> << <CAFFE_GET_BLOCKS(top[0]->count()), CAFFE_CUDA_NUM_THREADS >> >
@@ -112,9 +122,19 @@ namespace caffe {
       if (propagate_down[i]) {
         const Dtype sign = (i == 0) ? 1 : -1;
         int spatial_dim = diff_.height() * diff_.width();
+        
+	//0308 added: sum of all weights value as normalizer
+        Dtype valid_count = -1;
+        const int nthreads = outer_num_ * inner_num_;
+        if (normalization_ == LossParameter_NormalizationMode_VALID) {
+            caffe_gpu_asum(nthreads, bottom[2]->gpu_data(), &valid_count);
+        }
+	// 0308 added: if all weights are zeros, set as invalid
+        if (valid_count == 0)
+	{ valid_count = -1; }
 
         Dtype pre_fixed_normalizer = this->layer_param_.loss_param().pre_fixed_normalizer();
-        Dtype normalizer =  get_normalizer(normalization_, pre_fixed_normalizer);
+        Dtype normalizer =  get_normalizer(normalization_, pre_fixed_normalizer, valid_count);
 	LOG(INFO) << "SmoothL1 Backward: normalizer = " << normalizer;
         Dtype alpha = sign * top[0]->cpu_diff()[0] / normalizer;
 
