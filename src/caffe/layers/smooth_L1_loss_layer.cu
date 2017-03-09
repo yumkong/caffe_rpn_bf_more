@@ -75,13 +75,14 @@ namespace caffe {
 
     //0308 added: sum of all weights value as normalizer
     Dtype valid_count = -1;
-    const int nthreads = outer_num_ * inner_num_;
+    const int nthreads = bottom[2]->count(); //outer_num_ * inner_num_;
+	Dtype* counts = bottom[2]->mutable_gpu_data();
     if (normalization_ == LossParameter_NormalizationMode_VALID) {
-        caffe_gpu_asum(nthreads, bottom[2]->gpu_data(), &valid_count);
+        caffe_gpu_asum(nthreads, counts, &valid_count);
     }
     // 0308 added: if all weights are zeros, set as invalid
     if (valid_count == 0)
-    { valid_count = -1; }
+    { valid_count = 1; }
 
     Dtype pre_fixed_normalizer = this->layer_param_.loss_param().pre_fixed_normalizer();
     top[0]->mutable_cpu_data()[0] = loss / get_normalizer(normalization_,
@@ -125,17 +126,26 @@ namespace caffe {
         
 	//0308 added: sum of all weights value as normalizer
         Dtype valid_count = -1;
-        const int nthreads = outer_num_ * inner_num_;
+		//Dtype valid_count2 = -1;
+		//Dtype valid_count3 = -1;
+		Dtype* counts = bottom[2]->mutable_gpu_data();
+        const int nthreads = bottom[2]->count(); //outer_num_ * inner_num_;
         if (normalization_ == LossParameter_NormalizationMode_VALID) {
-            caffe_gpu_asum(nthreads, bottom[2]->gpu_data(), &valid_count);
+			//LOG(INFO) << "Valid has come";
+            caffe_gpu_asum(nthreads, counts, &valid_count);
+			//caffe_gpu_asum(bottom[2]->count(), bottom[2]->cpu_data(), &valid_count2);
+			//caffe_gpu_asum(bottom[2]->count(), bottom[2]->mutable_gpu_data(), &valid_count3);
         }
-	// 0308 added: if all weights are zeros, set as invalid
+		//LOG(INFO) << "SmoothL1 BP: outer_num_ = " << outer_num_ << ", inner_num_ = " << inner_num_;
+		//LOG(INFO) << "SmoothL1 BP: bot2 cnt = " << bottom[2]->count() << ", valid_count = " << valid_count;
+		//LOG(INFO) << "valid_count2 = " << valid_count2 << ", valid_count3 = " << valid_count3;
+	    // 0308 added: if all weights are zeros, set as invalid
         if (valid_count == 0)
-	{ valid_count = -1; }
+	    { valid_count = 1; }
 
         Dtype pre_fixed_normalizer = this->layer_param_.loss_param().pre_fixed_normalizer();
         Dtype normalizer =  get_normalizer(normalization_, pre_fixed_normalizer, valid_count);
-	LOG(INFO) << "SmoothL1 BP: normalizer = " << normalizer << ", valid_count = " << valid_count<<", normalization_ = " << normalization_<<", pre_fixed_normalizer = " << pre_fixed_normalizer;
+	LOG(INFO) << "SmoothL1 BP: normalizer = " << normalizer <<", normalization_ = " << normalization_<<", pre_fixed_normalizer = " << pre_fixed_normalizer;
         Dtype alpha = sign * top[0]->cpu_diff()[0] / normalizer;
 
         caffe_gpu_axpby(
