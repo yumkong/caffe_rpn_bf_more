@@ -323,6 +323,8 @@ message LayerParameter {
   optional BoxAnnotatorOHEMParameter box_annotator_ohem_param = 10000; //1208 added
   // liu@1210 added
   optional RpnClsOHEMParameter rpn_cls_ohem_param = 20000;
+  // 0323 added
+  optional ClfAnnotatorOHEMParameter clf_annotator_ohem_param = 20001;
   //0121 added
   optional BiasParameter bias_param = 141;
   optional ConcatParameter concat_param = 104;
