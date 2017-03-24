@@ -460,6 +460,12 @@ message BoxAnnotatorOHEMParameter {
   optional int32 ignore_label = 2 [default = -1]; // ignore_label in scoring
 }
 
+//0323 added
+message ClfAnnotatorOHEMParameter {
+  required uint32 roi_per_img = 1; // number of rois for training
+  optional int32 ignore_label = 2 [default = -1]; // ignore_label in scoring
+}
+
 //1210 added
 message RpnClsOHEMParameter {
   required uint32 bg_per_img = 1; // number of bg rois for training
