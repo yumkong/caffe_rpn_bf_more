@@ -64,14 +64,19 @@ void SmoothL1LossLayer<Dtype>::Reshape(
 
 template <typename Dtype>
 Dtype SmoothL1LossLayer<Dtype>::get_normalizer(
-  LossParameter_NormalizationMode normalization_mode, Dtype pre_fixed_normalizer) {
+  LossParameter_NormalizationMode normalization_mode, Dtype pre_fixed_normalizer, int valid_count) {
   Dtype normalizer;
   switch (normalization_mode) {
   case LossParameter_NormalizationMode_FULL:
     normalizer = Dtype(outer_num_ * inner_num_);
     break;
   case LossParameter_NormalizationMode_VALID:
-    normalizer = Dtype(outer_num_ * inner_num_);
+    //normalizer = Dtype(outer_num_ * inner_num_);
+    if (valid_count == -1) {
+        normalizer = Dtype(outer_num_ * inner_num_);
+    } else {
+        normalizer = Dtype(valid_count);
+    }
     break;
   case LossParameter_NormalizationMode_BATCH_SIZE:
     normalizer = Dtype(outer_num_);

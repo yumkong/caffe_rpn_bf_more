@@ -815,8 +815,11 @@ protected:
 
 	/// Read the normalization mode parameter and compute the normalizer based
         /// on the blob size. 
+        //0308 changed
+        //virtual Dtype get_normalizer(
+        //  LossParameter_NormalizationMode normalization_mode, Dtype pre_fixed_normalizer);
         virtual Dtype get_normalizer(
-          LossParameter_NormalizationMode normalization_mode, Dtype pre_fixed_normalizer);
+          LossParameter_NormalizationMode normalization_mode, Dtype pre_fixed_normalizer, int valid_count);
 
 	Blob<Dtype> diff_;
 	Blob<Dtype> errors_;
