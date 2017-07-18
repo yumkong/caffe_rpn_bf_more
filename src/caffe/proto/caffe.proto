@@ -327,6 +327,7 @@ message LayerParameter {
   optional ClfAnnotatorOHEMParameter clf_annotator_ohem_param = 20001;
   //0121 added
   optional BiasParameter bias_param = 141;
+  optional CenterLossParameter center_loss_param = 147; //0717 added
   optional ConcatParameter concat_param = 104;
   optional ContrastiveLossParameter contrastive_loss_param = 105;
   optional ConvolutionParameter convolution_param = 106;
@@ -346,6 +347,7 @@ message LayerParameter {
   optional LRNParameter lrn_param = 118;
   optional MemoryDataParameter memory_data_param = 119;
   optional MVNParameter mvn_param = 120;
+  optional PermuteParameter permute_param = 202; // 0716 added weiliu's permute layer
   optional NormalizeParameter norm_param = 206; //1208 added
   optional PoolingParameter pooling_param = 121;
   optional PowerParameter power_param = 122;
@@ -1296,4 +1298,21 @@ message PReLUParameter {
   optional FillerParameter filler = 1;
   // Whether or not slope paramters are shared across channels.
   optional bool channel_shared = 2 [default = false];
+}
+
+message CenterLossParameter {
+  optional uint32 num_output = 1; // The number of outputs for the layer
+  optional FillerParameter center_filler = 2; // The filler for the centers
+  // The first axis to be lumped into a single inner product computation;
+  // all preceding axes are retained in the output.
+  // May be negative to index from the end (e.g., -1 for the last axis).
+  optional int32 axis = 3 [default = 1];
+}
+
+// 0716 added weiliu's permute layer
+message PermuteParameter {
+  // The new orders of the axes of data. Notice it should be with
+  // in the same range as the input data, and it starts from 0.
+  // Do not provide repeated order.
+  repeated uint32 order = 1;
 }
