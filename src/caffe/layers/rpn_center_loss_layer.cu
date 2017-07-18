@@ -24,7 +24,7 @@ __global__ void Compute_distance_data_gpu(int nthreads, const int K, const Dtype
     // feat - center
     caffe_gpu_sub(K, bottom + m * K, center + label_value * K, distance + m * K);
 	// (feat - center) * label_weight (0 or 1)
-	caffe_gpu_scale(K, label_weight_value, distance + m * K, distance + m * K);
+	caffe_gpu_scale(K, (Dtype)label_weight_value, distance + m * K, distance + m * K);
   }
 }
 
