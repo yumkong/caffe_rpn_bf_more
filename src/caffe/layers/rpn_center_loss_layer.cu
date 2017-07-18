@@ -69,8 +69,8 @@ __global__ void Compute_center_diff_gpu(int nthreads, const int M, const int K,
 template <typename Dtype>
 void RpnCenterLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
-  //int nthreads = M_ * K_;
-  int nthreads = M_; // num x hei x wid
+  int nthreads = M_ * K_;
+  //int nthreads = M_; // num x hei x wid
   //liu@0716 changed:  added bottom[2]->gpu_data()  (label_weight)
   Compute_distance_data_gpu<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
      CAFFE_CUDA_NUM_THREADS>>>(nthreads, K_, bottom[0]->gpu_data(), bottom[1]->gpu_data(),
