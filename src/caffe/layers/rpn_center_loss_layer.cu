@@ -14,9 +14,9 @@ template <typename Dtype>
 __global__ void Compute_distance_data_gpu(int nthreads, const int K, const Dtype* bottom,
 	      const Dtype* label,const Dtype* label_weight, const Dtype* center, Dtype* distance) {
     CUDA_KERNEL_LOOP(index, nthreads) {
-    //int m = index / K;
-    int m = index;
-    //int k = index % K;  // no use here
+    int m = index / K;
+    //int m = index;
+    int k = index % K;  // no use here
     const int label_value = static_cast<int>(label[m]);
 	//liu@0716 added
 	const int label_weight_value = static_cast<int>(label_weight[m]);
@@ -52,16 +52,16 @@ __global__ void Compute_center_diff_gpu(int nthreads, const int M, const int K,
       if (label_weight_value > 0 && label_value == index) 
 	  {
         ++count;
-        //for (int k = 0; k < K; k++) {
-        //  variation_sum[index * K + k] -= distance[m * K + k];
-        //}
-		caffe_gpu_sub(K, variation_sum + index * K, distance + m * K, variation_sum + index * K);
+        for (int k = 0; k < K; k++) {
+          variation_sum[index * K + k] -= distance[m * K + k];
+        }
+		//caffe_gpu_sub(K, variation_sum + index * K, distance + m * K, variation_sum + index * K);
       }
     }
-    //for (int k = 0; k < K; k++) {
-    //  center_diff[index * K + k] = variation_sum[index * K + k] /(count + (Dtype)1.);
-    //}
-    caffe_gpu_scale(K, (Dtype)1./(count + (Dtype)1.), variation_sum + index * K, center_diff + index * K);
+    for (int k = 0; k < K; k++) {
+      center_diff[index * K + k] = variation_sum[index * K + k] /(count + (Dtype)1.);
+    }
+    //caffe_gpu_scale(K, (Dtype)1./(count + (Dtype)1.), variation_sum + index * K, center_diff + index * K);
   }
 }
 
