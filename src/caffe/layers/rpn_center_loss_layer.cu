@@ -7,9 +7,13 @@
 namespace caffe {
 
 template <typename Dtype>
-__global__ void Compute_distance_data_gpu(int nthreads, const int K, const Dtype* bottom,
-	      const Dtype* label,const Dtype* label_weight, const Dtype* center, Dtype* distance) {
-  CUDA_KERNEL_LOOP(index, nthreads) {
+void Compute_distance_data_gpu(int nthreads, const int K, const Dtype* bottom,
+	      const Dtype* label,const Dtype* label_weight, const Dtype* center, Dtype* distance) 
+{
+    for(int index = 0; index < nthreads; ++index) {
+//__global__ void Compute_distance_data_gpu(int nthreads, const int K, const Dtype* bottom,
+//	      const Dtype* label,const Dtype* label_weight, const Dtype* center, Dtype* distance) {
+//  CUDA_KERNEL_LOOP(index, nthreads) {
     //int m = index / K;
     int m = index;
     //int k = index % K;  // no use here
@@ -29,10 +33,14 @@ __global__ void Compute_distance_data_gpu(int nthreads, const int K, const Dtype
 }
 
 template <typename Dtype>
-__global__ void Compute_center_diff_gpu(int nthreads, const int M, const int K, 
-        const Dtype* label,const Dtype* label_weight, const Dtype* distance, Dtype* variation_sum, 
-        Dtype* center_diff) {
-  CUDA_KERNEL_LOOP(index, nthreads) 
+//__global__ void Compute_center_diff_gpu(int nthreads, const int M, const int K, 
+  //      const Dtype* label,const Dtype* label_weight, const Dtype* distance, Dtype* variation_sum, 
+    //    Dtype* center_diff) {
+  //CUDA_KERNEL_LOOP(index, nthreads) 
+void Compute_center_diff_gpu(int nthreads, const int M, const int K, 
+	  const Dtype* label,const Dtype* label_weight, const Dtype* distance, Dtype* variation_sum, 
+	  Dtype* center_diff) {
+  for(int index = 0; index < nthreads; ++index) 
   {
     int count = 0;
     for (int m = 0; m < M; m++) {
@@ -61,8 +69,9 @@ void RpnCenterLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   //int nthreads = M_ * K_;
   int nthreads = M_; // num x hei x wid
   //liu@0716 changed:  added bottom[2]->gpu_data()  (label_weight)
-  Compute_distance_data_gpu<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
-      CAFFE_CUDA_NUM_THREADS>>>(nthreads, K_, bottom[0]->gpu_data(), bottom[1]->gpu_data(),
+  //Compute_distance_data_gpu<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
+     // CAFFE_CUDA_NUM_THREADS>>>
+  Compute_distance_data_gpu(nthreads, K_, bottom[0]->gpu_data(), bottom[1]->gpu_data(),
       							bottom[2]->gpu_data(),
                                 this->blobs_[0]->gpu_data(), distance_.mutable_gpu_data());
   Dtype dot;
@@ -84,8 +93,9 @@ void RpnCenterLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   //caffe_gpu_set(variation_sum_->count(), Dtype(0), variation_sum_.mutable_gpu_data());
   // liu: here do not need "label_weight" because distance is already 0 from forward_gpu computation
   // liu: NONONO: still need label weight to reduce computation
-  Compute_center_diff_gpu<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
-      CAFFE_CUDA_NUM_THREADS>>>(nthreads, M_, K_, bottom[1]->gpu_data(),
+  //Compute_center_diff_gpu<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
+    //  CAFFE_CUDA_NUM_THREADS>>>
+  Compute_center_diff_gpu(nthreads, M_, K_, bottom[1]->gpu_data(),
                                 bottom[2]->gpu_data(), distance_.gpu_data(), 
                                 variation_sum_.mutable_gpu_data(), this->blobs_[0]->mutable_gpu_diff());
   // ### liu: should change M_ to actual count
