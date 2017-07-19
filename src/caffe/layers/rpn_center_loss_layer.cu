@@ -84,6 +84,8 @@ void RpnCenterLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   //Dtype loss = dot / M_ / Dtype(2);
   Dtype loss = dot / valid_count / Dtype(2);
   top[0]->mutable_cpu_data()[0] = loss;
+  LOG(INFO) << "dot = " << dot << ", valid_count = " << valid_count;
+  LOG(INFO) << "M_ = " << M_ << ", K_ = " << K_;
 }
 
 template <typename Dtype>
