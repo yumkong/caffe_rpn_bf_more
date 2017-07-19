@@ -70,6 +70,8 @@ template <typename Dtype>
 void RpnCenterLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   int nthreads = M_ * K_;
+  // liu 0719: initialized distance_ as 0 each time before using it
+  caffe_gpu_set(M_ * K_, Dtype(0), distance_.mutable_gpu_data());
   //int nthreads = M_; // num x hei x wid
   //liu@0716 changed:  added bottom[2]->gpu_data()  (label_weight)
   Compute_distance_data_gpu<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
