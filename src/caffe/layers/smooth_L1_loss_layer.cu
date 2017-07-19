@@ -147,7 +147,7 @@ namespace caffe {
         Dtype pre_fixed_normalizer = this->layer_param_.loss_param().pre_fixed_normalizer();
 
         Dtype normalizer =  get_normalizer(normalization_, pre_fixed_normalizer, valid_count);
-		LOG(INFO) << "SmoothL1 BP: normalizer = " << normalizer <<", normalization_ = " << normalization_<<", pre_fixed_normalizer = " << pre_fixed_normalizer;
+		//LOG(INFO) << "SmoothL1 BP: normalizer = " << normalizer <<", normalization_ = " << normalization_<<", pre_fixed_normalizer = " << pre_fixed_normalizer;
         Dtype alpha = sign * top[0]->cpu_diff()[0] / normalizer;
 
         caffe_gpu_axpby(
