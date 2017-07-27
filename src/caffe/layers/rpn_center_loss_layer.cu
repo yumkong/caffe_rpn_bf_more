@@ -59,7 +59,7 @@ __global__ void Compute_center_diff_gpu(int nthreads, const int M, const int K,
       }
     }
     for (int k = 0; k < K; k++) {
-      center_diff[index * K + k] = variation_sum[index * K + k] /(count + (Dtype)1.);
+      center_diff[index * K + k] = (Dtype)0.05 * variation_sum[index * K + k] /(count + (Dtype)1.);
     }
     //caffe_gpu_scale(K, (Dtype)1./(count + (Dtype)1.), variation_sum + index * K, center_diff + index * K);
   }
@@ -86,8 +86,8 @@ void RpnCenterLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   //Dtype loss = dot / M_ / Dtype(2);
   Dtype loss = dot / valid_count / Dtype(2);
   top[0]->mutable_cpu_data()[0] = loss;
-  LOG(INFO) << "dot = " << dot << ", valid_count = " << valid_count;
-  LOG(INFO) << "M_ = " << M_ << ", K_ = " << K_;
+  //LOG(INFO) << "dot = " << dot << ", valid_count = " << valid_count;
+  //LOG(INFO) << "M_ = " << M_ << ", K_ = " << K_;
 }
 
 template <typename Dtype>
