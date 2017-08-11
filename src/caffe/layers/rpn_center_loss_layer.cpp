@@ -10,6 +10,8 @@ template <typename Dtype>
 void RpnCenterLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   const int num_output = this->layer_param_.center_loss_param().num_output();  // 10
+  // liu@0811 added
+  lr_ = (Dtype)this->layer_param_.center_loss_param().lr(); // default 0.05
   N_ = num_output; // 2: face, non-face
   const int axis = bottom[0]->CanonicalAxisIndex(
       this->layer_param_.center_loss_param().axis()); // 1
@@ -81,7 +83,7 @@ void RpnCenterLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     if(label_weight_value > 0) // selected fg or bg
     {
          caffe_sub(K_, bottom_data + i * K_, center + label_value * K_, distance_data + i * K_);
-		 ++cnt; // number of valid data points in the output feature map
+	 ++cnt; // number of valid data points in the output feature map
     }
   }
   Dtype dot = caffe_cpu_dot(M_ * K_, distance_.cpu_data(), distance_.cpu_data());
@@ -127,9 +129,11 @@ void RpnCenterLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
           caffe_sub(K_, variation_sum_data + n * K_, distance_data + m * K_, variation_sum_data + n * K_);
         }
       }
-	  // a * x + y
-	  count_sum += count;
-      caffe_axpy(K_, (Dtype)1./(count + (Dtype)1.), variation_sum_data + n * K_, center_diff + n * K_);
+      // a * x + y
+      count_sum += count;
+      // liu@0811 added lr
+      //caffe_axpy(K_, (Dtype)1./(count + (Dtype)1.), variation_sum_data + n * K_, center_diff + n * K_);
+      caffe_axpy(K_, lr_ /(count + (Dtype)1.), variation_sum_data + n * K_, center_diff + n * K_);
     }
   }
   // Gradient with respect to bottom data 

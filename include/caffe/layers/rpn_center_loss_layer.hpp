@@ -38,6 +38,8 @@ class RpnCenterLossLayer : public LossLayer<Dtype> {
   int M_; // number of batch samples
   int K_; // feature length
   int N_; // number of centers
+  // liu@0811 added
+  Dtype lr_;
   
   Blob<Dtype> distance_;
   Blob<Dtype> variation_sum_;

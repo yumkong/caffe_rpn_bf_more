@@ -1307,6 +1307,8 @@ message CenterLossParameter {
   // all preceding axes are retained in the output.
   // May be negative to index from the end (e.g., -1 for the last axis).
   optional int32 axis = 3 [default = 1];
+  // liu@0811 added: the learning rate of center loss
+  optional float lr = 4 [default = 0.05];
 }
 
 // 0716 added weiliu's permute layer
